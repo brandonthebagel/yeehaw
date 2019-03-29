@@ -34,7 +34,30 @@ experiencefornextlevel,	//how many experience points the player needs to get to 
 level;	//the players current level
 char response;	//the players decision whether they want to play again after game over
 
+void levelUp()
+	{
+				cout << "level up!"<<endl;
+				experiencefornextlevel = experiencefornextlevel * 1.5;
+				playermaxHP ++;
+				playerhealth = playermaxHP;
+					cout << "max HP up and HP refilled" << endl;
+					playerattack++;
+					playermaxMP++;
+					playerMP = playermaxMP;
+					cout << "max MP up and MP refilled" << endl;
+					cout << "attack up" << endl;
+					monstermaxHP++;
+					monstermaxMP+3;
+					monsterattack++;
+					cout << "your foes grow stronger..." << endl;
+					level++;
+					playerhealstat++;
+	}
 
+void expGet(int exp)
+{
+  experience += exp;
+}
 
 int main()
 {
@@ -45,11 +68,11 @@ int main()
 	gamestart:
 		system("CLS");
 		cout << "MONSTER SLAYER" << endl;
-		cout<<"made by brandon chen"<<endl;	//title screen
+		cout << "made by brandon chen" << endl;	//title screen
 		system("pause");
 		system("CLS");
 		level = 1;
-		monsterskilled=0;
+		monsterskilled = 0;
 		playerhealstat = 5;
 		monsterhealstat = 2;
 		monstermaxMP = 6;
@@ -78,21 +101,21 @@ int main()
 					monsterMP++;
 				if (monsterMP < monstermaxMP)
 					monsterMP++;		//player and monster MP regen (note monster gets up to 2)
-		
-				
-					
+
+
+
 				monsteraction = rand() % (3) + 1;		//generates monsters action that round 1=atk 2=defnd 3=heal
 				system("CLS");
 				cout << "level: " << level << endl;
-				cout << "HP: " << playerhealth <<"/"<<playermaxHP<< endl;
-				cout << "MP: " << playerMP <<"/"<<playermaxMP<< endl;
-				cout << "monsters HP: " << monsterhealth<<"/"<<monstermaxHP << endl;
+				cout << "HP: " << playerhealth << "/" << playermaxHP << endl;
+				cout << "MP: " << playerMP << "/" << playermaxMP << endl;
+				cout << "monsters HP: " << monsterhealth << "/" << monstermaxHP << endl;
 				cout << "monsters MP: " << monsterMP << "/" << monstermaxMP << endl;	//displays player and monster current health and magic
 				cout << "1. attack(" << playerattack << "dmg)		2. defend		3. heal(-5MP)" << endl;	//player options
 				cin >> playeraction;
 				cout << endl;
-				
-				if((playeraction==1)&&(monsteraction==1))		//both attack
+
+				if ((playeraction == 1) && (monsteraction == 1))		//both attack
 				{
 					playerhealth -= monsterattack;
 					monsterhealth -= playerattack;
@@ -187,7 +210,6 @@ int main()
 							monsterhealth = monstermaxHP;
 						cout << "the monster healed";
 					}
-					cout << "and ";
 					if (playerMP < playerhealcost)
 						cout << "and you tried to heal but couldn't";
 					else
@@ -216,7 +238,7 @@ int main()
 		} while (playerhealth > 0);
 	gameover:
 		system("CLS");
-		cout <<endl<< "GAME OVER" << endl<<"you killed "<<monsterskilled<<" monsters"<<endl << "play again?" << endl;	//game over screen
+		cout << endl << "GAME OVER" << endl << "you killed " << monsterskilled << " monsters" << endl << "play again? y/n" << endl;	//game over screen
 		cin >> response;
 		if ((response != 'n') && (response != 'N') && (response != 'y') && (response != 'Y'))	//if the player does not answer y or n it takes them back to the game over screen
 			goto gameover;
@@ -227,27 +249,4 @@ int main()
 	return 0;
 }
 	
-	function levelUp()
-	{
-				cout << "level up!"<<endl;
-				experiencefornextlevel = experiencefornextlevel * 1.5;
-				playermaxHP ++;
-				playerhealth = playermaxHP;
-					cout << "max HP up and HP refilled" << endl;
-					playerattack++;
-					playermaxMP++;
-					playerMP = playermaxMP;
-					cout << "max MP up and MP refilled" << endl;
-					cout << "attack up" << endl;
-					monstermaxHP++;
-					monstermaxMP+3;
-					monsterattack++;
-					cout << "your foes grow stronger..." << endl;
-					level++;
-					playerhealstat++;
-	}
-
-function expGet(int exp)
-{
-  experience += exp;
-}
+	
