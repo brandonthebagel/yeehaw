@@ -1,0 +1,712 @@
+// game.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//Brandon Chen
+//monster slayer game
+//v.2.1.0
+
+#include "pch.h"
+#include <iostream>
+#include<iomanip>
+#include<string>
+#include<cstdlib>
+#include<ctime>
+using namespace std;
+int
+monsteraction,	//what the monster does
+playerhealth,	//players current health
+playerhealcost,	//how much MP it costs the player to heal
+monsterhealcost,	//how much MP it costs the monster to heal
+playerdmg,	//how much damage the player can do
+monsterdmg,	//how much damage the monster can do
+playermaxHP,	//the players maximum health
+playerMP,	//the players current MP (used for healing and potentially other spells in the future)
+playermaxMP,	//the players maximum MP
+playerfireballdamage,	//how much damage the players fireball spell does
+playerfireballcost,	//how much MP fireball costs
+burnturns,	//how many turns burn lasts for
+playerhealstat,	//how much the player heals by
+playerMPregen,//how much MP the player gets back
+monsterhealstat,	//how much the monster heals by
+monsterhealth,	//how much health the monster currently has
+monstermaxHP,	//the monsters maximum health
+monstermaxMP,	//the monsters maximum MP
+monsterMP,	//the monsters current MP (used for healing and potentially other spells in the future)
+monsterburncounter,	//how many turns the monster burns for
+burnpower,	//how much burn damage the target takes each turn
+playerattack,	//how much damage the player actually does that round
+criticalchance,//used to generate a random number which is compared to 10. if higher it is a critical hit
+criticalhitcheck,//the number generated to determine critical hits
+monsterattack,	//how much damage the monster actually does that round
+monsterskilled,	//how many monsters the player has killed
+experience,	//experience points the player has
+experiencefornextlevel,//how many experience points the player needs to get to the next level
+playerblockstat,//how much the player blocks
+monsterblockstat,//how much the monster blocks
+level;	//the players current level
+string
+minibosstype;	//what kind of miniboss it is
+int
+minibossencounterchance,	//how likely the player will encounter a miniboss
+minibossencounternum,//number generated for random chance of miniboss
+minibosstypenumber,	//the number associated with the miniboss type
+minibosshealth,	//minibosses current health
+minibossmaxHP,	//minibosses max health
+minibossattack,	//how much damage the miniboss can do
+minibossMP,	//minibosses current MP
+minibossmaxMP,	//minibosses max MP
+minibosshealcost,	//how much MP it cost the monster to heal
+minibosshealstat,//how much health the miniboss regains from healing
+minibossaction,//what the miniboss does that round
+minibossactiontext;	//what text displays for the minibosses action
+char response,	//the players decision whether they want to play again after game over
+playeraction;	//what the player does
+double playercriticalmodifier;//bonus damage from critical hit
+
+void levelUp()
+{
+	cout << "level up!" << endl;
+	experiencefornextlevel = experiencefornextlevel * 1.5;
+	playermaxHP++;
+	playerhealth = playermaxHP;
+	cout << "max HP up and HP refilled" << endl;
+	playerattack++;
+	playermaxMP++;
+	playerMP = playermaxMP;
+	cout << "max MP up and MP refilled" << endl << "fire ball and heal are now more powerful" << endl;
+	if (level % 3 == 0)
+	{
+		cout << "MP regen up" << endl;
+		playerMPregen++;
+	}
+	if (level % 4 == 0)
+	{
+		playerfireballcost++;
+		playerhealcost++;
+		cout << "fire ball and heal now cost more MP" << endl;
+		burnturns++;
+	}
+	cout << "attack up" << endl;
+	monstermaxHP++;
+	monstermaxMP += 2;
+	monsterattack++;
+	level++;
+	playerhealstat++;
+	monsterhealstat++;
+	minibossencounternum++;
+
+	if (level % 3 == 0)
+	{
+		playerfireballdamage++;
+		burnpower++;
+		playerattack++;
+		playerblockstat++;
+	}
+	if (level % 2 == 0)
+	{
+		playerblockstat++;
+		monsterblockstat++;
+		playercriticalmodifier += 0.1;
+		criticalchance++;
+		cout << "you now block more damage" << endl;
+		cout << "critical hit damage and chance up" << endl;
+	}
+	system("pause");
+	system("CLS");
+	cout << "your foes grow stronger..." << endl;
+}
+
+
+void expGet(int exp)
+{
+	experience += exp;
+}
+
+int main()
+{
+	time_t seconds;
+	time(&seconds);
+	srand((unsigned int)seconds);	//seeds random number generator for monsters actions
+
+	do {
+	gamestart:
+		system("CLS");
+		cout << "MONSTER SLAYER" << endl;
+		cout << "made by brandon chen" << endl;	//title screen
+		system("pause");
+		system("CLS");
+		level = 1;
+		burnturns = 3;
+		minibossencounternum = 21;
+		monsterskilled = 0;
+		playerhealstat = 5;
+		monsterblockstat = 2;
+		monsterhealstat = 2;
+		playerfireballdamage = 8;
+		playerfireballcost = 6;
+		playerblockstat = 2;
+		playerMPregen = 1;
+		burnpower = 1;
+		criticalchance = 10;
+		playercriticalmodifier = 1.5;
+		monstermaxMP = 6;
+		playerattack = 4;
+		monsterattack = 3;
+		playermaxHP = 20;
+		playerhealth = 20;
+		playerhealcost = 5;
+		monsterhealcost = 3;
+		playermaxMP = 10;
+		experiencefornextlevel = 4;
+		experience = 0;
+		monstermaxHP = 15;
+		playerMP = 10;		//base stats
+		do
+		{	monster:
+			minibossencounterchance = rand() % (minibossencounternum)+1;
+			if (minibossencounterchance > 25)
+				goto miniboss;			
+			system("CLS");
+			monsterhealth = monstermaxHP;
+			monsterMP = monstermaxMP;
+			monsterburncounter = 0;
+			cout << "A monster approaches" << endl;
+			system("pause");
+			do {
+
+				if ((playermaxMP - playerMP) > playerMPregen)
+					playerMP += playerMPregen;
+				else
+					playerMP = playermaxMP;
+				if (monsterMP < monstermaxMP)
+					monsterMP++;
+				if (monsterMP < monstermaxMP)
+
+
+					criticalhitcheck = rand() % (criticalchance)+1;
+				monsteraction = rand() % (3) + 1;		//generates monsters action that round 1=atk 2=defnd 3=heal
+			playerchoice:
+				system("CLS");
+				cout << "level: " << level << "	exp: " << experience << "/" << experiencefornextlevel << endl;
+				cout << "HP: " << playerhealth << "/" << playermaxHP << endl;
+				cout << "MP: " << playerMP << "/" << playermaxMP << endl;
+				cout << "monsters HP: " << monsterhealth << "/" << monstermaxHP << endl;
+				cout << "monsters MP: " << monsterMP << "/" << monstermaxMP << endl;	//displays player and monster current health and magic
+				cout << "1. attack(" << playerattack << "dmg)		2. defend		3. heal(-" << playerhealcost << "MP)(+" << playerhealstat << "HP)		4. fireball(-" << playerfireballcost << "MP)(" << playerfireballdamage << "dmg)" << endl;	//player options
+				cin >> playeraction;
+				if ((playeraction != '1') && (playeraction != '2') && (playeraction != '3') && (playeraction != '4'))	//if player does not enter one of the choices it goes back to the choices
+					goto playerchoice;
+				cout << endl;
+
+				if ((playeraction == '1') && (monsteraction == 1))		//both attack
+				{
+					cout << "you attack" << endl;
+					if (criticalhitcheck > 9)
+					{
+						monsterhealth -= (playerattack*playercriticalmodifier);
+						cout << "critical hit" << endl;
+					}
+					else
+						monsterhealth -= playerattack;
+					playerhealth -= monsterattack;
+					cout << "the monster attacks" << endl;
+
+				}
+				else if ((playeraction == '1') && (monsteraction == 2))	//player attacks monster defends
+				{
+					cout << "you attack ";
+					if (criticalhitcheck > 9)
+					{
+						monsterhealth -= ((playerattack*playercriticalmodifier) / 2);
+						cout << endl << "critical hit" << endl;
+					}
+					else
+						monsterhealth -= (playerattack / monsterblockstat);
+					cout << "but the monster defends" << endl;
+				}
+				else if ((playeraction == '1') && (monsteraction == 3))		//player attacks monster heals
+				{
+					cout << "you attacked ";
+					if (criticalhitcheck > 9)
+					{
+						monsterhealth -= (playerattack*playercriticalmodifier);
+						cout << endl << "critical hit" << endl;
+					}
+					else
+						monsterhealth -= playerattack;
+					if (monsterMP < monsterhealcost)
+						cout << "and the monster tried to heal but couldn't";
+					else
+					{
+						monsterMP -= monsterhealcost;
+						if ((monstermaxHP - monsterhealth) > monsterhealstat)
+							monsterhealth += monsterhealstat;
+						else
+							monsterhealth = monstermaxHP;
+						cout << "but the monster healed";
+					}
+				}
+				else if ((playeraction == '2') && (monsteraction == 1))	//player defends monster attacks
+				{
+					playerhealth -= (monsterattack / playerblockstat);
+					cout << "the monster attacks but you defended";
+				}
+				else if ((playeraction == '2') && (monsteraction == 2))		//both defend
+				{
+					cout << "you both defend... this is awkward";
+				}
+				else if ((playeraction == '2') && (monsteraction == 3))		//player defends monster heals
+				{
+					cout << "you defended ";
+					if (monsterMP < monsterhealcost)
+						cout << "and the monster tried to heal but couldn't";
+					else
+					{
+						monsterMP = monsterMP - monsterhealcost;
+						if ((monstermaxHP - monsterhealth) > monsterhealstat)
+							monsterhealth += monsterhealstat;
+						else
+							monsterhealth = monstermaxHP;
+						cout << "but the monster healed";
+					}
+				}
+				else if ((playeraction == '3') && (monsteraction == 1))	//player heals monster attacks
+				{
+					playerhealth -= monsterattack;
+					cout << "the monster attacks ";
+					if (playerMP < playerhealcost)
+						cout << "and you tried to heal but couldn't";
+					else
+					{
+						playerMP -= playerhealcost;
+						if ((playermaxHP - playerhealth) > playerhealstat)
+							playerhealth += playerhealstat;
+						else
+							playerhealth = playermaxHP;
+						cout << "but you healed";
+					}
+				}
+				else if ((playeraction == '3') && (monsteraction == 2))	//player heals monster defends
+				{
+					cout << "the monster defends ";
+					if (playerMP < playerhealcost)
+						cout << "and you tried to heal but couldn't";
+					else
+					{
+						playerMP -= playerhealcost;
+						if ((playermaxHP - playerhealth) > playerhealstat)
+							playerhealth += playerhealstat;
+						else
+							playerhealth = playermaxHP;
+						cout << "but you healed";
+					}
+				}
+				else if ((playeraction == '3') && (monsteraction == 3))		//both heal
+				{
+					if (monsterMP < monsterhealcost)
+						cout << "the monster tried to heal but couldn't ";
+					else
+					{
+						monsterMP -= monsterhealcost;
+						if ((monstermaxHP - monsterhealth) > monsterhealstat)
+							monsterhealth += monsterhealstat;
+						else
+							monsterhealth = monstermaxHP;
+						cout << "the monster healed";
+					}
+					if (playerMP < playerhealcost)
+						cout << " and you tried to heal but couldn't";
+					else
+					{
+						playerMP -= playerhealcost;
+						if ((playermaxHP - playerhealth) > playerhealstat)
+							playerhealth += playerhealstat;
+						else
+							playerhealth = playermaxHP;
+						cout << " and you healed";
+					}
+				}
+				else if ((playeraction == '4') && (monsteraction == 1))
+				{
+					playerhealth -= monsterattack;
+					cout << "the monster attacks ";
+					if (playerMP < playerfireballcost)
+						cout << "and you tried to cast fire ball but couldn't";
+					else
+					{
+						playerMP -= playerfireballcost;
+						monsterhealth -= playerfireballdamage;
+						cout << "and you cast fire ball";
+						monsterburncounter += burnturns;
+					}
+				}
+				else if ((playeraction == '4') && (monsteraction == 2))
+				{
+					cout << "the monster defends ";
+					if (playerMP < playerfireballcost)
+						cout << "and you tried to cast fire ball but couldn't";
+					else
+					{
+						playerMP -= playerfireballcost;
+						monsterhealth -= playerfireballdamage;
+						cout << "and you cast fire ball";
+						monsterburncounter += burnturns;
+					}
+				}
+				else if ((playeraction == '4') && (monsteraction == 3))
+				{
+					if (monsterMP < monsterhealcost)
+						cout << "the monster tried to heal but couldn't ";
+					else
+					{
+						monsterMP -= monsterhealcost;
+						if ((monstermaxHP - monsterhealth) > monsterhealstat)
+							monsterhealth += monsterhealstat;
+						else
+							monsterhealth = monstermaxHP;
+						cout << "the monster healed";
+					}
+					if (playerMP < playerfireballcost)
+						cout << " and you tried to cast fire ball but couldn't";
+					else
+					{
+						playerMP -= playerfireballcost;
+						monsterhealth -= playerfireballdamage;
+						cout << " and you cast fire ball";
+						monsterburncounter += burnturns;
+					}
+				}
+				if (monsterburncounter > 0)
+				{
+					monsterhealth -= burnpower;
+					monsterburncounter--;
+					cout << endl << "the monster takes burn damage";
+				}
+				if (playerhealth < 1)		//player dies
+					goto gameover;
+
+				cout << endl;
+				system("pause");
+			} while (monsterhealth > 0);					//player defeats monster
+			system("CLS");
+			cout << "monster defeated!" << endl;
+			monsterskilled++;
+			expGet(1);	//adds experience points
+			if (experience >= experiencefornextlevel)	//checks if player has leveled up
+			{
+				levelUp();
+			}
+			goto monster;
+		miniboss:
+			cout << "WARNING a strong monster approaches" << endl;
+			system("pause");
+			system("CLS");
+			minibossmaxHP = (monstermaxHP * 4);
+			minibosshealth = minibossmaxHP;
+			minibossmaxMP = (monstermaxMP * 3);
+			minibossMP = 0;
+			minibossattack = (monsterattack * 1.5);
+			minibosshealstat = minibossmaxHP;
+			minibosshealcost = (0.75*minibossmaxMP);
+			minibosstypenumber = rand() % (3) + 1;
+			switch (minibosstypenumber)
+			{
+			case 1: {minibosstype = "Feral Beast";
+				break; }
+			case 2: {minibosstype = "Abomination";
+				break; }
+			case 3: {minibosstype = "Writhing Mass";
+				break; }
+			default: {minibosstype = "Large Monster";
+				break; }
+			}
+			do
+			{
+				if ((playermaxMP - playerMP) > playerMPregen)
+					playerMP += playerMPregen;
+				else
+					playerMP = playermaxMP;
+				if (minibossMP < minibossmaxMP)
+					minibossMP++;
+				if (minibossMP < minibossmaxMP)
+					minibossMP++;
+				if (minibossMP >= minibosshealcost)
+					minibossaction = rand() % (3) + 1;
+				else
+					minibossaction = rand() % (2) + 1;
+				criticalhitcheck = rand() % (criticalchance)+1;
+				minibossactiontext = rand() % (3) + 1;
+				system("CLS");
+				cout << endl;
+				do
+				{
+					system("CLS");
+					cout << "level: " << level << "	exp: " << experience << "/" << experiencefornextlevel << endl;
+					cout << "HP: " << playerhealth << "/" << playermaxHP << endl;
+					cout << "MP: " << playerMP << "/" << playermaxMP << endl;
+					cout << "monsters HP: " << minibosshealth << "/" << minibossmaxHP << endl;
+					cout << "monsters MP: " << minibossMP << "/" << minibossmaxMP << endl;	//displays player and monster current health and magic
+					cout << "1. attack(" << playerattack << "dmg)		2. defend		3. heal(-" << playerhealcost << "MP)(+" << playerhealstat << "HP)		4. fireball(-" << playerfireballcost << "MP)(" << playerfireballdamage << "dmg)" << endl;	//player options
+					switch (minibossaction)
+					{
+					case 1:		//miniboss is about to attack
+					{
+						switch (minibossactiontext)
+						{
+						case 1: {cout << "The " << minibosstype << " tenses up.";
+							break; }
+						case 2: {cout << "The " << minibosstype << " looks around anxiously.";
+							break; }
+						case 3: {cout << "The " << minibosstype << " prepares to attack.";
+							break; }
+						}
+						break;
+					}
+					case 2: //miniboss is about to defend
+					{
+						switch (minibossactiontext)
+						{
+						case 1: {cout << "The " << minibosstype << " tenses up.";
+							break; }
+						case 2: {cout << "The " << minibosstype << " braces itself.";
+							break; }
+						case 3: {cout << "The " << minibosstype << " watches your movements.";
+							break; }
+						}
+						break;
+					}
+					case 3: //miniboss is about to heal
+					{
+						switch (minibossactiontext)
+						{
+						case 1: {cout << "The " << minibosstype << " looks around anxiously.";
+							break; }
+						case 2: {cout << "The " << minibosstype << " prepares to heal.";
+							break; }
+						case 3: {cout << "The " << minibosstype << " readies its mana.";
+							break; }
+						}
+						break;
+					}
+					}
+					cout << endl;
+					
+					cin >> playeraction;
+				} while ((playeraction != '1') && (playeraction != '2') && (playeraction != '3') && (playeraction != '4'));
+				switch (playeraction)
+				{
+				case '1':
+				{
+					switch (minibossaction)
+					{
+					case 1:
+					{
+						cout << "you attack" << endl;
+						if (criticalhitcheck > 9)
+						{
+							minibosshealth -= (playerattack*playercriticalmodifier);
+							cout << "critical hit" << endl;
+						}
+						else
+							minibosshealth -= playerattack;
+						playerhealth -= minibossattack;
+						cout << "the monster attacks" << endl;
+						break;
+					}
+					case 2:
+					{
+						cout << "you attack but the monster defended";
+						minibosshealth -= 1;
+						break;
+					}
+					case 3:
+					{
+						cout << "the monster tried to heal but you interrupted it with an attack";
+						minibossMP -= minibosshealcost;
+						if (criticalhitcheck > 9)
+						{
+							minibosshealth -= (playerattack*playercriticalmodifier);
+							cout << "critical hit" << endl;
+						}
+						else
+							minibosshealth -= playerattack;
+						break;
+					}
+					}
+					break;
+
+				}
+				case '2':
+				{
+					switch (minibossaction)
+					{
+					case 1:
+					{
+						cout << "the monster attacks but you defended";
+						playerhealth -= (minibossattack / playerblockstat);
+						break;
+					}
+
+					case 2:
+					{
+						cout << "you both defend. Tensions are high";
+						break;
+					}
+					case 3:
+					{
+						cout << "you defended";
+						minibossMP -= minibosshealcost;
+						if ((minibossmaxHP - minibosshealth) > minibosshealstat)
+							minibosshealth += minibosshealstat;
+						else
+							minibosshealth = minibossmaxHP;
+						cout << " but the monster healed";
+						break;
+					}
+					}
+					break;
+				}
+				case '3':
+				{
+					switch (minibossaction)
+					{
+					case 1:
+					{
+						playerhealth -= minibossattack;
+						cout << "the monster attacks ";
+						if (playerMP < playerhealcost)
+							cout << "and you tried to heal but couldn't";
+						else
+						{
+							playerMP -= playerhealcost;
+							if ((playermaxHP - playerhealth) > playerhealstat)
+								playerhealth += playerhealstat;
+							else
+								playerhealth = playermaxHP;
+							cout << "and you healed";
+						}
+						break;
+					}
+					case 2:
+					{
+						cout << "the monster defended ";
+						if (playerMP < playerhealcost)
+							cout << "and you tried to heal but couldn't";
+						else
+						{
+							playerMP -= playerhealcost;
+							if ((playermaxHP - playerhealth) > playerhealstat)
+								playerhealth += playerhealstat;
+							else
+								playerhealth = playermaxHP;
+							cout << "and you healed";
+						}
+						break;
+					}
+					case 3:
+					{
+						minibossMP -= minibosshealcost;
+						if ((minibossmaxHP - minibosshealth) > minibosshealstat)
+							minibosshealth += minibosshealstat;
+						else
+							minibosshealth = minibossmaxHP;
+						cout << "the monster healed ";
+						if (playerMP < playerhealcost)
+							cout << "and you tried to heal but couldn't";
+						else
+						{
+							playerMP -= playerhealcost;
+							if ((playermaxHP - playerhealth) > playerhealstat)
+								playerhealth += playerhealstat;
+							else
+								playerhealth = playermaxHP;
+							cout << "and you healed";
+						}
+						break;
+					}
+					}
+					break;
+				}
+				case '4':
+				{
+					switch (minibossaction)
+					{
+					case 1:
+					{
+						playerhealth -= minibossattack;
+						cout << "the monster attacks ";
+						if (playerMP < playerfireballcost)
+							cout << "and you tried to cast fire ball but couldn't";
+						else
+						{
+							playerMP -= playerfireballcost;
+							minibosshealth -= playerfireballdamage;
+							cout << "and you cast fire ball";
+							monsterburncounter += burnturns;
+						}
+						break;
+					}
+					case 2:
+					{
+						cout << "the monster defends ";
+						if (playerMP < playerfireballcost)
+							cout << "and you tried to cast fire ball but couldn't";
+						else
+						{
+							playerMP -= playerfireballcost;
+							minibosshealth -= playerfireballdamage;
+							cout << "but you cast fire ball";
+							monsterburncounter += burnturns;
+						}
+						break;
+					}
+					case 3:
+					{
+						minibossMP = minibossMP - minibosshealcost;
+						if ((minibossmaxHP - minibosshealth) > minibosshealstat)
+							minibosshealth += minibosshealstat;
+						else
+							minibosshealth = minibossmaxHP;
+						cout << "the monster healed ";
+						if (playerMP < playerfireballcost)
+							cout << "and you tried to cast fire ball but couldn't";
+						else
+						{
+							playerMP -= playerfireballcost;
+							minibosshealth -= playerfireballdamage;
+							cout << "but you cast fire ball";
+							monsterburncounter += burnturns;
+						}
+						break;
+					}
+					}
+					break;
+				}
+				}
+				if (monsterburncounter > 0)
+				{
+					minibosshealth -= burnpower;
+					monsterburncounter--;
+					cout << endl << "the monster takes burn damage";
+				}
+				if (playerhealth < 1)		//player dies
+					goto gameover;
+				cout << endl;
+				system("pause");
+			} while (minibosshealth > 0);
+			expGet(5);	//adds experience points
+			if (experience >= experiencefornextlevel)	//checks if player has leveled up
+			{
+				levelUp();
+			}
+		} while (playerhealth > 0);
+	gameover:
+		system("CLS");
+		cout << endl << "GAME OVER" << endl << "you killed " << monsterskilled << " monsters" << endl << "play again? y/n" << endl;	//game over screen
+		cin >> response;
+		if ((response != 'n') && (response != 'N') && (response != 'y') && (response != 'Y'))	//if the player does not answer y or n it takes them back to the game over screen
+			goto gameover;
+	} while ((response == 'y') || (response == 'Y'));	//player ends game
+	system("CLS");
+	cout << "Thanks for playing" << endl;
+	system("pause");
+	return 0;
+}
